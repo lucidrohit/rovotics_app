@@ -1,20 +1,24 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import "./global.css"
+import { SafeAreaView } from 'react-native';
+import useAppInit from './src/hooks/useAppInit';
+import ConnectionStatusProvider from './src/contexts/ConnectionStatus';
+import { ToastProvider } from 'react-native-toast-notifications'
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import MainScreen from "./src/screens/MainScreen";
 
 export default function App() {
+  useAppInit();
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <GestureHandlerRootView>
+      <SafeAreaView>
+        <ToastProvider placement='top'>
+          <ConnectionStatusProvider>
+            <MainScreen />
+          </ConnectionStatusProvider>
+        </ToastProvider>
+      </SafeAreaView>
+    </GestureHandlerRootView>
+
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
