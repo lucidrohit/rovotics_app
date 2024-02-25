@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
 import { View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { JoyStickPosition } from '../screens/MainScreen';
 
 const JOYSTICK_RADIUS = 170;
@@ -24,11 +23,11 @@ export default function JoyStick(props: JoyStickProps) {
                 const angle = Math.atan2(translationY, translationX);
                 const x = Math.cos(angle) * JOYSTICK_RADIUS / 2;
                 const y = Math.sin(angle) * JOYSTICK_RADIUS / 2;
-                position.value = { x, y }
+                position.value = { x:props.steeringMode?0:x, y }
                 runOnJS(props.onMove)(position.value);
 
             } else {
-                position.value = { x: translationX, y: translationY }
+                position.value = { x: props.steeringMode?0:translationX, y: translationY }
                 runOnJS(props.onMove)(position.value);
 
             }
@@ -42,13 +41,20 @@ export default function JoyStick(props: JoyStickProps) {
         ],
     }))
 
+    const steeringModeStyle = useAnimatedStyle(() => ({
+        height: props.steeringMode ? 1.5*JOYSTICK_RADIUS:JOYSTICK_RADIUS ,
+        width: props.steeringMode ? 1.2*BALL_RADIUS:JOYSTICK_RADIUS ,
+        backgroundColor: props.steeringMode ? 'black' : 'green',
+    }))
 
     return (
-        <View style={{ width: JOYSTICK_RADIUS, height: JOYSTICK_RADIUS }} className='bg-black rounded-full items-center justify-center ' >
+       <View className='rounded-full items-center justify-center ' style={{width:JOYSTICK_RADIUS,height:JOYSTICK_RADIUS}}>
+         <Animated.View style={[steeringModeStyle]} className=' rounded-full items-center justify-center ' >
             <GestureDetector gesture={pan} >
                 <Animated.View style={[{ width: BALL_RADIUS, height: BALL_RADIUS }, panMoveStyle]} className='bg-red-500 z-10 rounded-full' />
             </GestureDetector>
-        </View>
+        </Animated.View>
+       </View>
     )
 }
 
