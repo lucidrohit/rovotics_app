@@ -6,8 +6,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-
-const STEERINGWHEEL_RADIUS = 250;
+import { SENSITIVITY_FACTOR, STEERINGWHEEL_RADIUS } from "../utils/constants";
 
 
 export default function SteeringWheel(props: SteeringWheelProps) {
@@ -17,7 +16,8 @@ export default function SteeringWheel(props: SteeringWheelProps) {
 
   const pan = Gesture.Pan()
     .onTouchesUp(() => {
-      rotationValue.value = withSpring(0, { damping: 20, stiffness: 100 });
+      rotationValue.value = withSpring(0, { damping: 20, stiffness: 200, restSpeedThreshold: 0.1, restDisplacementThreshold: 0.1 });
+      runOnJS(props.onMove)(0);
     })
     .onUpdate(({ y, x }) => {
       const coordX = x - STEERINGWHEEL_RADIUS / 2;
@@ -54,8 +54,17 @@ export default function SteeringWheel(props: SteeringWheelProps) {
       if( isBeginingInFourthQuadrant && isRotationValueInFirstQuadrant){
         delta = -2*Math.PI + delta
       }
+      
+      delta = delta*SENSITIVITY_FACTOR
+      
 
-      rotationValue.value = withSpring(delta, { damping: 20, stiffness: 100 })
+      if(delta>Math.PI){
+        delta = Math.PI
+      }else if(delta<-Math.PI){
+        delta = -Math.PI
+      }
+
+      rotationValue.value = withSpring(delta, { damping: 20, stiffness: 200 })
       runOnJS(props.onMove)(delta);
 
 

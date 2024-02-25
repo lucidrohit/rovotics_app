@@ -1,19 +1,18 @@
 import { View } from 'react-native'
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { JoyStickPosition } from '../screens/MainScreen';
+import { useEffect } from 'react';
+import { BALL_RADIUS,  JOYSTICK_RADIUS} from '../utils/constants';
 
-const JOYSTICK_RADIUS = 170;
-const BALL_RADIUS = 60;
 
-export default function JoyStick(props: JoyStickProps) {
+function JoyStick(props: JoyStickProps) {
     const position = useSharedValue({ x: 0, y: 0 });
+    const sw = useSharedValue(props.steeringMode?{w:1.2*BALL_RADIUS,h:1.6*JOYSTICK_RADIUS}:{w:JOYSTICK_RADIUS,h:JOYSTICK_RADIUS});
 
     const pan = Gesture.Pan()
         .onTouchesUp(() => {
-            let transX = withSpring(0, { damping: 20, stiffness: 100 });
-            let transY = withSpring(0, { damping: 20, stiffness: 100 });
-            position.value = { x: transX, y: transY };
+            position.value = withSpring({x:0,y:0}, { damping: 20, stiffness: 100 })
             runOnJS(props.onMove)({ x: 0, y: 0});
         })
         .onUpdate(({ translationX, translationY }) => {
@@ -32,8 +31,7 @@ export default function JoyStick(props: JoyStickProps) {
 
             }
 
-        });
-
+        })
     const panMoveStyle = useAnimatedStyle(() => ({
         transform: [
             { translateX: position.value.x },
@@ -42,14 +40,21 @@ export default function JoyStick(props: JoyStickProps) {
     }))
 
     const steeringModeStyle = useAnimatedStyle(() => ({
-        height: props.steeringMode ? 1.5*JOYSTICK_RADIUS:JOYSTICK_RADIUS ,
-        width: props.steeringMode ? 1.2*BALL_RADIUS:JOYSTICK_RADIUS ,
-        backgroundColor: props.steeringMode ? 'black' : 'green',
+        height: sw.value.h,
+        width: sw.value.w ,
     }))
 
+    useEffect(()=>{
+        if(props.steeringMode){
+            sw.value = withTiming({w:1.2*BALL_RADIUS,h:1.6*JOYSTICK_RADIUS})
+        }else{
+            sw.value = withTiming({w:JOYSTICK_RADIUS,h:JOYSTICK_RADIUS})
+        }
+    },[props.steeringMode])
+
     return (
-       <View className='rounded-full items-center justify-center ' style={{width:JOYSTICK_RADIUS,height:JOYSTICK_RADIUS}}>
-         <Animated.View style={[steeringModeStyle]} className=' rounded-full items-center justify-center ' >
+       <View className='rounded-full items-center justify-center self-end' style={{width:JOYSTICK_RADIUS,height:1.6*JOYSTICK_RADIUS}}>
+         <Animated.View style={[steeringModeStyle]} className=' bg-black rounded-full items-center justify-center ' >
             <GestureDetector gesture={pan} >
                 <Animated.View style={[{ width: BALL_RADIUS, height: BALL_RADIUS }, panMoveStyle]} className='bg-red-500 z-10 rounded-full' />
             </GestureDetector>
@@ -60,6 +65,8 @@ export default function JoyStick(props: JoyStickProps) {
 
 
 type JoyStickProps = {
-    onMove: (position:JoyStickPosition) => void;
+    onMove: (position: JoyStickPosition) => void;
     steeringMode: boolean;
-}
+};
+
+export default JoyStick;

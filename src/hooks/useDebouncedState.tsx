@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { debounce } from 'lodash';
+import { debounce, throttle } from 'lodash';
 
-export default function useDebouncedState<T>(initialState: T, delay: number = 2) {
+export default function useDebouncedState<T>(initialState: T, delay: number = 200) {
     const [state, setState] = useState(initialState);
-    const debouncedSetState = debounce(setState, delay);
+    const debouncedSetState = throttle(setState, delay);
 
     useEffect(() => {
         return () => {

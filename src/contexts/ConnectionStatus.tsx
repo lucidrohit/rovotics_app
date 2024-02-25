@@ -71,12 +71,14 @@ function ConnectionStatusProvider({ children }: React.PropsWithChildren) {
 
     
     function sendMSG(msg:string){
+        // if(!connected) return;
         try {
             ws.send(msg)
+            console.log(msg)
         } catch (error) {
            toast.show("Error in sending message", {
                 type:"error"
-              })
+            })
         }
     }
 
