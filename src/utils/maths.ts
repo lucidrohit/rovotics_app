@@ -7,7 +7,7 @@ export function joyStickAngle(x:number,y:number) {
     return isNaN(angle) ? 0 : angle;
 }
 
-function getAngle(coordY: number, coordX: number) {
+export function getAngle(coordY: number, coordX: number) {
         const angle = Math.atan(Math.abs(coordY / coordX));
         
         if (coordX > 0 && coordY > 0) {

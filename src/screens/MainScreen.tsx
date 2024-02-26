@@ -1,10 +1,9 @@
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import JoyStick from "../components/JoyStick";
 import { useEffect, useRef, useState } from "react";
-import useDebouncedState from "../hooks/useDebouncedState";
 import { useConnectionStatus } from "../contexts/ConnectionStatus";
 import SteeringWheel from "../components/SteeringWheel";
-import { useDerivedValue } from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue } from "react-native-reanimated";
 import { joyStickAngle } from "../utils/maths";
 import { JOYSTICK_RADIUS } from "../utils/constants";
 
@@ -53,12 +52,26 @@ export default function MainScreen() {
     );
 }
 
+
 function ConnectionStatusIndicator() {
     const { connectionStatus } = useConnectionStatus();
+   
+    const bgColor = useSharedValue(connectionStatus ? '#22C55E' : '#EF4444');
+
+    useEffect(()=>{
+        bgColor.value = connectionStatus ? '#22C55E' : '#EF4444';
+    },[connectionStatus])
+
+    const colorStyle = useAnimatedStyle(()=>{
+        return {
+            backgroundColor: bgColor.value
+        }
+    })
+
     return (
-        <View
-            className={`self-end w-3 h-3 ${connectionStatus ? "bg-green-500" : "bg-red-500"
-                }  rounded-full`}
+        <Animated.View
+            className="self-end w-3 h-3 rounded-full"
+            style={[colorStyle]}
         />
     );
 }
